@@ -60,14 +60,15 @@ class _CadastroPrestadorPageState extends State<CadastroPrestadorPage> {
           .where(_servicosSelecionados.contains)
           .toList(growable: false);
 
-      await FirebaseFirestore.instance.collection('prestadores').add({
+      await FirebaseFirestore.instance.collection('prestadores_pendentes').add({
         'nome': _nomeController.text.trim(),
         'empresa': _empresaController.text.trim(),
         'cnpj': _cnpjController.text.trim(),
         'telefone': _telefoneController.text.trim(),
         'servicos': servicos,
         'emergencia': _emergencia,
-        'ativo': true,
+        'status': 'pendente',
+        'criadoEm': FieldValue.serverTimestamp(),
       });
 
       if (!mounted) return;
@@ -84,7 +85,7 @@ class _CadastroPrestadorPageState extends State<CadastroPrestadorPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Prestador cadastrado com sucesso.'),
+          content: Text('Cadastro enviado com sucesso.'),
           behavior: SnackBarBehavior.floating,
         ),
       );

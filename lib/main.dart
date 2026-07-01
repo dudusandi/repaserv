@@ -1,7 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-import 'cadastro_prestadores.dart';
+import 'app_theme.dart';
+import 'auth_gate.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -20,19 +21,8 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'RepaServ',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1F7A5A),
-          brightness: Brightness.light,
-        ),
-        inputDecorationTheme: const InputDecorationTheme(
-          border: OutlineInputBorder(),
-          filled: true,
-          fillColor: Colors.white,
-        ),
-        useMaterial3: true,
-      ),
-      home: const CadastroPrestadorPage(),
+      theme: buildAppTheme(),
+      home: const AuthGate(),
     );
   }
 }
