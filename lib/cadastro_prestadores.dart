@@ -1,6 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+const List<String> kServicosPrestador = [
+  'Elétrica',
+  'Hidráulica',
+  'Construção e Reforma',
+  'Pintura',
+  'Marcenaria e Móveis',
+  'Vidraçaria',
+  'Serralheria',
+  'Climatização',
+  'Eletrodomésticos',
+  'Limpeza',
+  'Jardinagem',
+  'Piscinas',
+  'Segurança Eletrônica',
+  'Portões e Interfones',
+  'Informática',
+  'Chaveiro',
+  'Impermeabilização',
+];
+
 class CadastroPrestadorPage extends StatefulWidget {
   const CadastroPrestadorPage({super.key});
 
@@ -14,8 +34,8 @@ class _CadastroPrestadorPageState extends State<CadastroPrestadorPage> {
   final _empresaController = TextEditingController();
   final _cnpjController = TextEditingController();
   final _telefoneController = TextEditingController();
-  final _funcaoController = TextEditingController();
 
+  final Set<String> _servicosSelecionados = {};
   bool _emergencia = false;
   bool _salvando = false;
 
@@ -25,7 +45,6 @@ class _CadastroPrestadorPageState extends State<CadastroPrestadorPage> {
     _empresaController.dispose();
     _cnpjController.dispose();
     _telefoneController.dispose();
-    _funcaoController.dispose();
     super.dispose();
   }
 
@@ -37,12 +56,16 @@ class _CadastroPrestadorPageState extends State<CadastroPrestadorPage> {
     setState(() => _salvando = true);
 
     try {
+      final servicos = kServicosPrestador
+          .where(_servicosSelecionados.contains)
+          .toList(growable: false);
+
       await FirebaseFirestore.instance.collection('prestadores').add({
         'nome': _nomeController.text.trim(),
         'empresa': _empresaController.text.trim(),
         'cnpj': _cnpjController.text.trim(),
         'telefone': _telefoneController.text.trim(),
-        'funcao': _funcaoController.text.trim(),
+        'servicos': servicos,
         'emergencia': _emergencia,
         'ativo': true,
       });
@@ -54,8 +77,10 @@ class _CadastroPrestadorPageState extends State<CadastroPrestadorPage> {
       _empresaController.clear();
       _cnpjController.clear();
       _telefoneController.clear();
-      _funcaoController.clear();
-      setState(() => _emergencia = false);
+      setState(() {
+        _servicosSelecionados.clear();
+        _emergencia = false;
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -87,14 +112,17 @@ class _CadastroPrestadorPageState extends State<CadastroPrestadorPage> {
     return null;
   }
 
+  String? _validarServicos(List<String>? value) {
+    if (_servicosSelecionados.isEmpty) {
+      return 'Selecione pelo menos um servico';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F5),
-      appBar: AppBar(
-        title: const Text('Cadastro de prestadores'),
-        centerTitle: false,
-      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -115,14 +143,17 @@ class _CadastroPrestadorPageState extends State<CadastroPrestadorPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          'Novo prestador',
-                          style: Theme.of(context).textTheme.headlineSmall,
+                        Center(
+                          child: Image.asset(
+                            'assets/logo.png',
+                            height: 140,
+                            fit: BoxFit.contain,
+                          ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 20),
                         Text(
-                          'Preencha os dados para liberar o fornecedor na base do RepaServ.',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          'Cadastro de Prestador de Serviço',
+                          style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 24),
                         LayoutBuilder(
@@ -188,15 +219,82 @@ class _CadastroPrestadorPageState extends State<CadastroPrestadorPage> {
                                 ),
                                 SizedBox(
                                   width: constraints.maxWidth,
-                                  child: TextFormField(
-                                    controller: _funcaoController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Funcao / servico',
-                                      prefixIcon: Icon(Icons.handyman_outlined),
-                                    ),
-                                    textInputAction: TextInputAction.done,
-                                    validator: _validarObrigatorio,
-                                    onFieldSubmitted: (_) => _salvarPrestador(),
+                                  child: FormField<List<String>>(
+                                    validator: _validarServicos,
+                                    builder: (field) {
+                                      return InputDecorator(
+                                        decoration: InputDecoration(
+                                          labelText: 'Serviços',
+                                          errorText: field.errorText,
+                                          border: const OutlineInputBorder(),
+                                          contentPadding:
+                                              const EdgeInsets.fromLTRB(
+                                                12,
+                                                16,
+                                                12,
+                                                8,
+                                              ),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 8,
+                                          ),
+                                          child: Wrap(
+                                            spacing: 8,
+                                            runSpacing: 0,
+                                            children: kServicosPrestador.map((
+                                              servico,
+                                            ) {
+                                              final selecionado =
+                                                  _servicosSelecionados
+                                                      .contains(servico);
+
+                                              return SizedBox(
+                                                width: isWide
+                                                    ? (constraints.maxWidth -
+                                                              32) /
+                                                          3
+                                                    : constraints.maxWidth,
+                                                child: CheckboxListTile(
+                                                  contentPadding:
+                                                      EdgeInsets.zero,
+                                                  dense: true,
+                                                  controlAffinity:
+                                                      ListTileControlAffinity
+                                                          .leading,
+                                                  title: Text(servico),
+                                                  value: selecionado,
+                                                  onChanged: _salvando
+                                                      ? null
+                                                      : (value) {
+                                                          setState(() {
+                                                            if (value ??
+                                                                false) {
+                                                              _servicosSelecionados
+                                                                  .add(servico);
+                                                            } else {
+                                                              _servicosSelecionados
+                                                                  .remove(
+                                                                    servico,
+                                                                  );
+                                                            }
+                                                          });
+                                                          field.didChange(
+                                                            kServicosPrestador
+                                                                .where(
+                                                                  _servicosSelecionados
+                                                                      .contains,
+                                                                )
+                                                                .toList(),
+                                                          );
+                                                        },
+                                                ),
+                                              );
+                                            }).toList(),
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                               ],
@@ -206,9 +304,9 @@ class _CadastroPrestadorPageState extends State<CadastroPrestadorPage> {
                         const SizedBox(height: 16),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text('Atende emergencia'),
+                          title: const Text('Atende emergência'),
                           subtitle: const Text(
-                            'Marque quando o prestador puder ser acionado fora do fluxo comum.',
+                            'Marque apenas se tiver disponibilidade 24 horas.',
                           ),
                           value: _emergencia,
                           onChanged: _salvando
