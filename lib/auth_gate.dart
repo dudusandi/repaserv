@@ -36,11 +36,8 @@ class PerfilUsuarioGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      future: FirebaseFirestore.instance
-          .collection('usuarios')
-          .doc(user.uid)
-          .get(),
+    return FutureBuilder<_PerfilUsuario>(
+      future: _carregarPerfil(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -55,7 +52,8 @@ class PerfilUsuarioGate extends StatelessWidget {
           );
         }
 
-        final dados = snapshot.data?.data();
+        final perfil = snapshot.data;
+        final dados = perfil?.dados;
 
         if (dados == null) {
           return const AcessoNegadoPage(
@@ -81,6 +79,11 @@ class PerfilUsuarioGate extends StatelessWidget {
           return AppHomePage(
             nome: dados['nome']?.toString(),
             email: dados['email']?.toString() ?? user.email,
+            usuarioId: user.uid,
+            condominioId: dados['condominioId']?.toString(),
+            unidadeId: dados['unidadeId']?.toString(),
+            unidadeLabel: dados['unidadeLabel']?.toString(),
+            nomeCondominio: perfil?.nomeCondominio,
             tipo: tipo,
             plano: plano,
             acessoAte: acessoAte,
@@ -111,7 +114,7 @@ class PerfilUsuarioGate extends StatelessWidget {
               mensagem: 'Renove seu acesso anual para continuar usando o app.',
             );
           }
-        } else if (plano != 'gratis') {
+        } else if (plano != 'gratis' && plano != 'condominio') {
           return const AcessoNegadoPage(
             titulo: 'Plano inválido',
             mensagem: 'Seu plano de acesso precisa ser revisado.',
@@ -121,11 +124,39 @@ class PerfilUsuarioGate extends StatelessWidget {
         return AppHomePage(
           nome: dados['nome']?.toString(),
           email: dados['email']?.toString() ?? user.email,
+          usuarioId: user.uid,
+          condominioId: dados['condominioId']?.toString(),
+          unidadeId: dados['unidadeId']?.toString(),
+          unidadeLabel: dados['unidadeLabel']?.toString(),
+          nomeCondominio: perfil?.nomeCondominio,
           tipo: tipo,
           plano: plano,
           acessoAte: acessoAte,
         );
       },
+    );
+  }
+
+  Future<_PerfilUsuario> _carregarPerfil() async {
+    final usuarioDoc = await FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(user.uid)
+        .get();
+    final dados = usuarioDoc.data();
+    final condominioId = dados?['condominioId']?.toString();
+
+    if (condominioId == null || condominioId.isEmpty) {
+      return _PerfilUsuario(dados: dados);
+    }
+
+    final condominioDoc = await FirebaseFirestore.instance
+        .collection('condominios')
+        .doc(condominioId)
+        .get();
+
+    return _PerfilUsuario(
+      dados: dados,
+      nomeCondominio: condominioDoc.data()?['nome']?.toString(),
     );
   }
 
@@ -140,6 +171,13 @@ class PerfilUsuarioGate extends StatelessWidget {
 
     return null;
   }
+}
+
+class _PerfilUsuario {
+  const _PerfilUsuario({required this.dados, this.nomeCondominio});
+
+  final Map<String, dynamic>? dados;
+  final String? nomeCondominio;
 }
 
 class AcessoNegadoPage extends StatelessWidget {

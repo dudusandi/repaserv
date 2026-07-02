@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
+import 'app_theme.dart';
 import 'cadastro_prestadores.dart';
 import 'firebase_options.dart';
 
@@ -20,18 +21,8 @@ class CadastroPrestadoresApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Cadastro de Prestadores',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1F7A5A),
-          brightness: Brightness.light,
-        ),
-        inputDecorationTheme: const InputDecorationTheme(
-          border: OutlineInputBorder(),
-          filled: true,
-          fillColor: Colors.white,
-        ),
-        useMaterial3: true,
-      ),
+      theme: buildAppTheme(),
+      builder: buildAppViewport,
       home: const CadastroPrestadorPage(),
     );
   }

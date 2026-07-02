@@ -9,6 +9,30 @@ const secondaryTextColor = Color(0xFF7D766C);
 const secondaryBackgroundColor = Color(0xFFF2EFE9);
 const dividerColor = Color(0xFFEEE7DC);
 const errorColor = Color(0xFFCC8B8B);
+const appMaxWidth = 430.0;
+
+class AppViewport extends StatelessWidget {
+  const AppViewport({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: backgroundColor,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: appMaxWidth),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+Widget buildAppViewport(BuildContext context, Widget? child) {
+  return AppViewport(child: child ?? const SizedBox.shrink());
+}
 
 ThemeData buildAppTheme() {
   return ThemeData(

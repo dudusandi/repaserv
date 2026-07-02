@@ -2,9 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'app_theme.dart';
-import 'cadastro_prestadores.dart';
-
-enum _LoginIdentificacao { casa, condominio }
+import 'login_prestador.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -20,7 +18,6 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _entrando = false;
   bool _ocultarSenha = true;
-  _LoginIdentificacao _identificacao = _LoginIdentificacao.casa;
 
   @override
   void dispose() {
@@ -106,29 +103,8 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Escolha sua identificação',
+                        'Use seu usuário ou e-mail para acessar',
                         style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 32),
-                      _OpcaoIdentificacaoCard(
-                        titulo: 'Casa',
-                        subtitulo: 'Acesse usando seu ID pessoal',
-                        icon: Icons.cottage_rounded,
-                        selecionado: _identificacao == _LoginIdentificacao.casa,
-                        onTap: () => setState(
-                          () => _identificacao = _LoginIdentificacao.casa,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _OpcaoIdentificacaoCard(
-                        titulo: 'Condomínio',
-                        subtitulo: 'Acesse usando ID do condomínio',
-                        icon: Icons.apartment_rounded,
-                        selecionado:
-                            _identificacao == _LoginIdentificacao.condominio,
-                        onTap: () => setState(
-                          () => _identificacao = _LoginIdentificacao.condominio,
-                        ),
                       ),
                       const SizedBox(height: 32),
                       TextFormField(
@@ -195,7 +171,7 @@ class _LoginPageState extends State<LoginPage> {
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
-                              builder: (_) => const CadastroPrestadorPage(),
+                              builder: (_) => const LoginPrestadorPage(),
                             ),
                           );
                         },
@@ -225,93 +201,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OpcaoIdentificacaoCard extends StatelessWidget {
-  const _OpcaoIdentificacaoCard({
-    required this.titulo,
-    required this.subtitulo,
-    required this.icon,
-    required this.selecionado,
-    required this.onTap,
-  });
-
-  final String titulo;
-  final String subtitulo;
-  final IconData icon;
-  final bool selecionado;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: surfaceColor,
-      borderRadius: BorderRadius.circular(32),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(32),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32),
-            border: Border.all(
-              color: selecionado ? primaryColor : dividerColor,
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x144A453E),
-                blurRadius: 8,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: selecionado
-                      ? primaryColor.withValues(alpha: 0.10)
-                      : secondaryBackgroundColor,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  color: selecionado ? primaryColor : secondaryTextColor,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      titulo,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitulo,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                selecionado
-                    ? Icons.radio_button_checked_rounded
-                    : Icons.radio_button_off_rounded,
-                color: primaryColor,
-                size: 22,
-              ),
-            ],
           ),
         ),
       ),

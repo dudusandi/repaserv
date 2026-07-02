@@ -22,6 +22,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'RepaServ',
       theme: buildAppTheme(),
+      builder: buildAppViewport,
       home: const AuthGate(),
     );
   }
